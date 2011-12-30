@@ -7,6 +7,7 @@ import unittest
 import kmeans
 import pickle
 import clusterdata
+import random
 
 class Test(unittest.TestCase):
 
@@ -24,18 +25,27 @@ class Test(unittest.TestCase):
         self.assertIsNotNone(maxes)
         self.assertEquals(clusterdata.SummaryData.DIMENSIONS,len(mins))
         self.assertEquals(clusterdata.SummaryData.DIMENSIONS,len(maxes))
-        pass
+        
+        for i in range(0,clusterdata.SummaryData.DIMENSIONS):
+            self.assertTrue(maxes[i] > mins[i])
+        
+    
+    def testInitializeCentroids(self):
+        
+        km = kmeans.KmeansClusterer(4)
+        centroids = km.initializeCentroids(self.summaryDatas)
+        self.assertEquals(4,len(centroids))
+        
+        
     
     def testFindClosestCentroid(self):
+        
         pass
     
     def testGetRandomNumberInRange(self):
         pass
     
-    def testInitializeCentroids(self):
-        
-        
-        pass
+    
     
     
     def loadSummaryDatas(self):
