@@ -56,12 +56,9 @@ class KmeansClusterer:
         return centroids[1] # stub code
             
     def initializeRanges(self,summaryDatas):
-        loRanges = []
-        hiRanges = []
+        loRanges = {}
+        hiRanges = {}
         
-        for i in range(clusterdata.SummaryData.DIMENSIONS):
-            loRanges[i] = None
-            hiRanges[i] = None
             
         for summaryData in summaryDatas:
             '''
@@ -71,54 +68,54 @@ class KmeansClusterer:
             self.netLost = netLost
             self.timeSeconds = timeSeconds
             '''
-            if(loRanges[clusterdata.TOTAL_DIST] == None):
+            if(clusterdata.TOTAL_DIST not in loRanges):
                 loRanges[clusterdata.TOTAL_DIST] = summaryData.totalDist
-            if(loRanges[clusterdata.TOTAL_DIST] > summaryData.totalDist):
+            elif(loRanges[clusterdata.TOTAL_DIST] > summaryData.totalDist):
                 loRanges[clusterdata.TOTAL_DIST] = summaryData.totalDist
             
-            if(hiRanges[clusterdata.TOTAL_DIST] == None):
+            if(clusterdata.TOTAL_DIST not in hiRanges):
                 hiRanges[clusterdata.TOTAL_DIST] = summaryData.totalDist
-            if(hiRanges[clusterdata.TOTAL_DIST] < summaryData.totalDist):
+            elif(hiRanges[clusterdata.TOTAL_DIST] < summaryData.totalDist):
                 hiRanges[clusterdata.TOTAL_DIST] = summaryData.totalDist
             
-            if(loRanges[clusterdata.AVG_HR] == None):
+            if(clusterdata.AVG_HR not in loRanges):
                 loRanges[clusterdata.AVG_HR] = summaryData.avgHR
-            if(loRanges[clusterdata.AVG_HR] > summaryData.avgHR):
+            elif(loRanges[clusterdata.AVG_HR] > summaryData.avgHR):
                 loRanges[clusterdata.AVG_HR] = summaryData.avgHR
             
-            if(hiRanges[clusterdata.AVG_HR] == None):
+            if(clusterdata.AVG_HR not in hiRanges):
                 hiRanges[clusterdata.AVG_HR] = summaryData.avgHR
-            if(hiRanges[clusterdata.AVG_HR] < summaryData.avgHR):
+            elif(hiRanges[clusterdata.AVG_HR] < summaryData.avgHR):
                 hiRanges[clusterdata.AVG_HR] = summaryData.avgHR
             
-            if(loRanges[clusterdata.NET_GAINED] == None):
+            if(clusterdata.NET_GAINED not in loRanges):
                 loRanges[clusterdata.NET_GAINED] = summaryData.netGained
-            if(loRanges[clusterdata.NET_GAINED] > summaryData.netGained):
+            elif(loRanges[clusterdata.NET_GAINED] > summaryData.netGained):
                 loRanges[clusterdata.NET_GAINED] = summaryData.netGained
             
-            if(hiRanges[clusterdata.NET_GAINED] == None):
+            if(clusterdata.NET_GAINED not in hiRanges):
                 hiRanges[clusterdata.NET_GAINED] = summaryData.netGained
-            if(hiRanges[clusterdata.NET_GAINED] < summaryData.netGained):
+            elif(hiRanges[clusterdata.NET_GAINED] < summaryData.netGained):
                 hiRanges[clusterdata.NET_GAINED] = summaryData.netGained
                 
-            if(loRanges[clusterdata.NET_LOST] == None):
+            if(clusterdata.NET_LOST not in loRanges):
                 loRanges[clusterdata.NET_LOST] = summaryData.netLost
-            if(loRanges[clusterdata.NET_LOST] > summaryData.netLost):
+            elif(loRanges[clusterdata.NET_LOST] > summaryData.netLost):
                 loRanges[clusterdata.NET_LOST] = summaryData.netLost
             
-            if(hiRanges[clusterdata.NET_LOST] == None):
+            if(clusterdata.NET_LOST not in hiRanges):
                 hiRanges[clusterdata.NET_LOST] = summaryData.netLost
-            if(hiRanges[clusterdata.NET_LOST] < summaryData.netLost):
+            elif(hiRanges[clusterdata.NET_LOST] < summaryData.netLost):
                 hiRanges[clusterdata.NET_LOST] = summaryData.netLost
             
-            if(loRanges[clusterdata.TIME] == None):
+            if(clusterdata.TIME not in loRanges):
                 loRanges[clusterdata.TIME] = summaryData.timeSeconds
-            if(loRanges[clusterdata.TIME] > summaryData.timeSeconds):
+            elif(loRanges[clusterdata.TIME] > summaryData.timeSeconds):
                 loRanges[clusterdata.TIME] = summaryData.timeSeconds
             
-            if(hiRanges[clusterdata.TIME] == None):
+            if(clusterdata.TIME not in hiRanges):
                 hiRanges[clusterdata.TIME] = summaryData.timeSeconds
-            if(hiRanges[clusterdata.TIME] < summaryData.timeSeconds):
+            elif(hiRanges[clusterdata.TIME] < summaryData.timeSeconds):
                 hiRanges[clusterdata.TIME] = summaryData.timeSeconds
                 
             return loRanges,hiRanges

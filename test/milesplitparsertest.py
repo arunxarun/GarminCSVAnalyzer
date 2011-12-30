@@ -105,18 +105,18 @@ class Test(unittest.TestCase):
         self.assertEquals(11,len(dataByLap))
         
         with open('../resources/objects.pyc', 'w') as pickleFile:
-            for lap in dataByLap:
-                print lap.prettyPrint()
-                pickle.dump(lap,pickleFile)
+            pickle.dump(dataByLap,pickleFile)
+            
             
         
     def testLoadPickledFile(self):
-        allObjects = []
+        testDict = None
         with open('../resources/objects.pyc', 'r') as pickleFile:
-            allObjects = pickle.load(pickleFile)
+            testDict = pickle.load(pickleFile)
         
- 
-            print obj.lap
+        
+        self.assertIsNotNone(testDict)
+            
             
         
 if __name__ == "__main__":
