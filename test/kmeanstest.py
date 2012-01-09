@@ -6,36 +6,30 @@ Created on Dec 21, 2011
 import unittest
 import kmeans
 import pickle
+import copy
 import clusterdata
-import random
 
 class Test(unittest.TestCase):
 
     def setUp(self):
         self.summaryDatas = self.loadSummaryDatas()
-        
     def tearDown(self):
         pass
    
-    def testInitializeRanges(self):
-        km = kmeans.KmeansClusterer(4)
-        mins, maxes = km.initializeRanges(self.summaryDatas)
-        
-        self.assertIsNotNone(mins)
-        self.assertIsNotNone(maxes)
-        self.assertEquals(clusterdata.SummaryData.DIMENSIONS,len(mins))
-        self.assertEquals(clusterdata.SummaryData.DIMENSIONS,len(maxes))
-        
-        for i in range(0,clusterdata.SummaryData.DIMENSIONS):
-            self.assertTrue(maxes[i] > mins[i])
+    def loadSummaryDatas(self):
         
         
+        with open('../resources/objects.pyc') as f:
+            summaryDatas = pickle.load(f)
+            
+        return summaryDatas
+
     
-    def testInitializeCentroids(self):
-        
+    def testFindClosestCentroid(self):
         km = kmeans.KmeansClusterer(4)
-        mins, maxes = km.initializeRanges(self.summaryDatas)
-        centroids = km.initializeCentroids(self.summaryDatas)
+        
+        centroids,mins,maxes = clusterdata.initializeCentroids(4,self.summaryDatas)
+        
         self.assertEquals(4,len(centroids))
         
         for centroid in centroids:
@@ -55,22 +49,48 @@ class Test(unittest.TestCase):
             self.assertTrue(centroid.timeSeconds <= maxes[clusterdata.TIME])
         
         
+        centroids,mins,maxes = clusterdata.initializeCentroids(4,self.summaryDatas)
+        self.assertEquals(4,len(centroids))
         
-    
-    def testFindClosestCentroid(self):
+        # take the 4th centroid and clone it.
         
+        data = copy.copy(centroids[3])
+        centroid = km.findClosestCentroid(centroids, data,mins,maxes)
+        
+        '''
+        self.lap = lap
+        self.totalDist = totalDist
+        self.avgHR = avgHR
+        self.netGained = netGained
+        self.netLost = netLost
+        self.timeSeconds = timeSeconds
+        self.goodRecords = goodRecords
+        self.badRecords = badRecords
+        '''
+        self.assertEquals(centroid.lap,centroids[3].lap)
+        self.assertEquals(centroid.totalDist,centroids[3].totalDist)
+        self.assertEquals(centroid.avgHR,centroids[3].avgHR)
+        self.assertEquals(centroid.netGained,centroids[3].netGained)
+        self.assertEquals(centroid.netLost,centroids[3].netLost)
+        self.assertEquals(centroid.timeSeconds,centroids[3].timeSeconds)
+        self.assertEquals(centroid.goodRecords,centroids[3].goodRecords)
+        self.assertEquals(centroid.badRecords,centroids[3].badRecords)
+        self.assertEquals(centroid,centroids[3])
         pass
     
-    def testGetRandomNumberInRange(self):
-        pass
     
+    def testCluster(self):
+        
     
-    
-    
-    def loadSummaryDatas(self):
-        summaryDatas = None
-        with open('../resources/objects.pyc') as f:
-            summaryDatas = pickle.load(f)
+        km = kmeans.KmeansClusterer(4)
+        
+        clustersByCentroid = km.cluster(self.summaryDatas)
+        
+        self.assertFalse(clustersByCentroid == None)
+        self.assertEqual(4,len(clustersByCentroid))
+        
+        for k,v in clustersByCentroid.items():
+            self.assertTrue(len(v) > 0)
             
-        return summaryDatas
         
+    
