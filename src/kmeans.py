@@ -1,8 +1,6 @@
 import sys
 import logging
-import datetime
-import clusterdata
-import random
+from clusterdata  import ClusterData
 
 
 
@@ -19,7 +17,7 @@ class KmeansClusterer:
             sys.exit()
        
             
-        centroids,mins,maxes =  clusterdata.initializeCentroids(self.centroidCt,summaryDatas)
+        centroids,mins,maxes =  ClusterData.initializeCentroids(self.centroidCt,summaryDatas)
         
         clustersByCentroid = {}
         keepGoing = True
@@ -45,7 +43,7 @@ class KmeansClusterer:
     def areCentroidsCloseEnough(self,oldCentroids,newCentroids,mins,maxes):
         
         for i in range(0,len(oldCentroids)):
-            if clusterdata.inErrorRange(oldCentroids[i], newCentroids[i], mins,maxes) == False:
+            if ClusterData.inErrorRange(oldCentroids[i], newCentroids[i], mins,maxes) == False:
                 return False
             
         
@@ -73,10 +71,10 @@ class KmeansClusterer:
         for centroid in oldCentroids:
             if centroid in clustersByCentroids:
                 dataByCluster = clustersByCentroids[centroid]
-                newCentroids.append(clusterdata.createMeanCentroid(centroid.lap,dataByCluster))
+                newCentroids.append(ClusterData.createMeanCentroid(centroid.lap,dataByCluster))
             else:
                 clusterName = "cluster %d"%i
-                newCentroids.append(clusterdata.generateRandomSummaryData(clusterName,mins,maxes))
+                newCentroids.append(ClusterData.generateRandomSummaryData(clusterName,mins,maxes))
             
             i += 1
     

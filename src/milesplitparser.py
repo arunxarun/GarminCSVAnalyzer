@@ -145,7 +145,7 @@ class MileSplitParser:
     def generateLapData(self,activityHasLaps,lapHasTrackPoints):
         
         sortedLaps = sorted(lapHasTrackPoints.keys())
-        summaryData = []
+        allLapDatas = []
         for lap in sortedLaps:
             lastDist = 0
             badRecords = 0
@@ -203,13 +203,13 @@ class MileSplitParser:
             
             time = lastTime - startTime
             
-            sumData = clusterdata.SummaryData(lap,totalDist,avgHR,netGained,netLost,time.seconds,recordCt,badRecords)
+            lapData = clusterdata.LapData(lap,totalDist,avgHR,netGained,netLost,time.seconds,recordCt,badRecords)
             if badRecords > 0 :
                 self.logger.warn("bad records = %d out of %d records"%(badRecords,len(points)))
             
-            summaryData.append(sumData)
+            allLapDatas.append(lapData)
         
-        return summaryData
+        return allLapDatas
         
 if __name__ == '__main__':
     

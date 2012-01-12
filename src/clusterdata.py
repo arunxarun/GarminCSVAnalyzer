@@ -16,134 +16,141 @@ BADRECS = 6
 
 ERROR_DIST = 1
 
-def inErrorRange(point1,point2,minRange,maxRange):
-    if(point1.distanceTo(point2,minRange,maxRange) >= ERROR_DIST):
-        return False
-    else:
-        return True
+class ClusterData:
+    @staticmethod
+    def inErrorRange(point1,point2,minRange,maxRange):
+        if(point1.distanceTo(point2,minRange,maxRange) >= ERROR_DIST):
+            return False
+        else:
+            return True
+    @staticmethod
 
-def createMeanCentroid(clusterName,summaryDatas):
-    
-    summaryTotalDist = 0.0
-    summaryAvgHr = 0.0
-    summaryNetGained = 0.0
-    summaryNetLost = 0.0
-    summaryTime = 0.0
-    summaryGoodRecs = 0.0
-    summaryBadRecs = 0.0
-    
-    for data in summaryDatas:
-        summaryTotalDist += data.totalDist
-        summaryAvgHr += data.avgHR
-        summaryNetGained += data.netGained
-        summaryNetLost += data.netLost
-        summaryTime += data.timeSeconds
-        summaryGoodRecs += data.goodRecords
-        summaryBadRecs += data.badRecords
+    def createMeanCentroid(clusterName,summaryDatas):
         
-    
-    divisor = len(summaryDatas)
-    avgDist = summaryTotalDist/divisor
-    avgHr = summaryAvgHr/divisor
-    avgNetGained = summaryNetGained/divisor
-    avgNetLost = summaryNetLost/divisor
-    avgTime = summaryTime/divisor
-    avgGoodRecs = summaryGoodRecs/divisor
-    avgBadRecs = summaryBadRecs/divisor
-    
-    return SummaryData(clusterName,avgDist,avgHr,avgNetGained,avgNetLost,avgTime,avgGoodRecs,avgBadRecs)
-    
-
-def initializeCentroids(centroidCt,summaryDatas):
-    
-    loRanges,hiRanges = initializeRanges(summaryDatas)
-    
-    centroids = []
-    
-    for i in range(centroidCt):
-        centroids.append(generateRandomSummaryData("centroid %d"%i,loRanges,hiRanges))
-    
-    return centroids,loRanges,hiRanges
-
-
-def generateRandomSummaryData(pointName,loRanges,hiRanges):
-    return SummaryData( 
-            pointName,                                              
-            random.randrange(int(loRanges[TOTAL_DIST]),int(hiRanges[TOTAL_DIST])),
-            random.randrange(int(loRanges[AVG_HR]),int(hiRanges[AVG_HR])),
-            random.randrange(int(loRanges[NET_GAINED]),int(hiRanges[NET_GAINED])),
-            random.randrange(int(loRanges[NET_LOST]),int(hiRanges[NET_LOST])),
-            random.randrange(int(loRanges[TIME]),int(hiRanges[TIME])),0,0)
-    
-def initializeRanges(summaryDatas):
-    loRanges = {}
-    hiRanges = {}
-    
+        summaryTotalDist = 0.0
+        summaryAvgHr = 0.0
+        summaryNetGained = 0.0
+        summaryNetLost = 0.0
+        summaryTime = 0.0
+        summaryGoodRecs = 0.0
+        summaryBadRecs = 0.0
         
-    for summaryData in summaryDatas:
-        '''
-        self.totalDist = totalDist
-        self.avgHR = avgHR
-        self.netGained = netGained
-        self.netLost = netLost
-        self.timeSeconds = timeSeconds
-        '''
-        if(TOTAL_DIST not in loRanges):
-            loRanges[TOTAL_DIST] = summaryData.totalDist
-        
-        if(loRanges[TOTAL_DIST] > summaryData.totalDist):
-            loRanges[TOTAL_DIST] = summaryData.totalDist
-        
-        if(TOTAL_DIST not in hiRanges):
-            hiRanges[TOTAL_DIST] = summaryData.totalDist
-        if(hiRanges[TOTAL_DIST] < summaryData.totalDist):
-            hiRanges[TOTAL_DIST] = summaryData.totalDist
-        
-        if(AVG_HR not in loRanges):
-            loRanges[AVG_HR] = summaryData.avgHR
-        
-        if(loRanges[AVG_HR] > summaryData.avgHR):
-            loRanges[AVG_HR] = summaryData.avgHR
-        
-        if(AVG_HR not in hiRanges):
-            hiRanges[AVG_HR] = summaryData.avgHR
-        if(hiRanges[AVG_HR] < summaryData.avgHR):
-            hiRanges[AVG_HR] = summaryData.avgHR
-        
-        if(NET_GAINED not in loRanges):
-            loRanges[NET_GAINED] = summaryData.netGained
-        if(loRanges[NET_GAINED] > summaryData.netGained):
-            loRanges[NET_GAINED] = summaryData.netGained
-        
-        if(NET_GAINED not in hiRanges):
-            hiRanges[NET_GAINED] = summaryData.netGained
-        if(hiRanges[NET_GAINED] < summaryData.netGained):
-            hiRanges[NET_GAINED] = summaryData.netGained
+        for data in summaryDatas:
+            summaryTotalDist += data.totalDist
+            summaryAvgHr += data.avgHR
+            summaryNetGained += data.netGained
+            summaryNetLost += data.netLost
+            summaryTime += data.timeSeconds
+            summaryGoodRecs += data.goodRecords
+            summaryBadRecs += data.badRecords
             
-        if(NET_LOST not in loRanges):
-            loRanges[NET_LOST] = summaryData.netLost
-        if(loRanges[NET_LOST] > summaryData.netLost):
-            loRanges[NET_LOST] = summaryData.netLost
         
-        if(NET_LOST not in hiRanges):
-            hiRanges[NET_LOST] = summaryData.netLost
-        if(hiRanges[NET_LOST] < summaryData.netLost):
-            hiRanges[NET_LOST] = summaryData.netLost
+        divisor = len(summaryDatas)
+        avgDist = summaryTotalDist/divisor
+        avgHr = summaryAvgHr/divisor
+        avgNetGained = summaryNetGained/divisor
+        avgNetLost = summaryNetLost/divisor
+        avgTime = summaryTime/divisor
+        avgGoodRecs = summaryGoodRecs/divisor
+        avgBadRecs = summaryBadRecs/divisor
         
-        if(TIME not in loRanges):
-            loRanges[TIME] = summaryData.timeSeconds
-        if(loRanges[TIME] > summaryData.timeSeconds):
-            loRanges[TIME] = summaryData.timeSeconds
+        return LapData(clusterName,avgDist,avgHr,avgNetGained,avgNetLost,avgTime,avgGoodRecs,avgBadRecs)
+    
+    @staticmethod
+
+    def initializeCentroids(centroidCt,summaryDatas):
         
-        if(TIME not in hiRanges):
-            hiRanges[TIME] = summaryData.timeSeconds
-        if(hiRanges[TIME] < summaryData.timeSeconds):
-            hiRanges[TIME] = summaryData.timeSeconds
+        loRanges,hiRanges = ClusterData.initializeRanges(summaryDatas)
+        
+        centroids = []
+        
+        for i in range(centroidCt):
+            centroids.append(ClusterData.generateRandomSummaryData("centroid %d"%i,loRanges,hiRanges))
+        
+        return centroids,loRanges,hiRanges
+
+    @staticmethod
+
+    def generateRandomSummaryData(pointName,loRanges,hiRanges):
+        return LapData( 
+                pointName,                                              
+                random.randrange(int(loRanges[TOTAL_DIST]),int(hiRanges[TOTAL_DIST])),
+                random.randrange(int(loRanges[AVG_HR]),int(hiRanges[AVG_HR])),
+                random.randrange(int(loRanges[NET_GAINED]),int(hiRanges[NET_GAINED])),
+                random.randrange(int(loRanges[NET_LOST]),int(hiRanges[NET_LOST])),
+                random.randrange(int(loRanges[TIME]),int(hiRanges[TIME])),0,0)
+
+    @staticmethod
+    
+    def initializeRanges(summaryDatas):
+        loRanges = {}
+        hiRanges = {}
+        
             
-    return loRanges,hiRanges
+        for summaryData in summaryDatas:
+            '''
+            self.totalDist = totalDist
+            self.avgHR = avgHR
+            self.netGained = netGained
+            self.netLost = netLost
+            self.timeSeconds = timeSeconds
+            '''
+            if(TOTAL_DIST not in loRanges):
+                loRanges[TOTAL_DIST] = summaryData.totalDist
+            
+            if(loRanges[TOTAL_DIST] > summaryData.totalDist):
+                loRanges[TOTAL_DIST] = summaryData.totalDist
+            
+            if(TOTAL_DIST not in hiRanges):
+                hiRanges[TOTAL_DIST] = summaryData.totalDist
+            if(hiRanges[TOTAL_DIST] < summaryData.totalDist):
+                hiRanges[TOTAL_DIST] = summaryData.totalDist
+            
+            if(AVG_HR not in loRanges):
+                loRanges[AVG_HR] = summaryData.avgHR
+            
+            if(loRanges[AVG_HR] > summaryData.avgHR):
+                loRanges[AVG_HR] = summaryData.avgHR
+            
+            if(AVG_HR not in hiRanges):
+                hiRanges[AVG_HR] = summaryData.avgHR
+            if(hiRanges[AVG_HR] < summaryData.avgHR):
+                hiRanges[AVG_HR] = summaryData.avgHR
+            
+            if(NET_GAINED not in loRanges):
+                loRanges[NET_GAINED] = summaryData.netGained
+            if(loRanges[NET_GAINED] > summaryData.netGained):
+                loRanges[NET_GAINED] = summaryData.netGained
+            
+            if(NET_GAINED not in hiRanges):
+                hiRanges[NET_GAINED] = summaryData.netGained
+            if(hiRanges[NET_GAINED] < summaryData.netGained):
+                hiRanges[NET_GAINED] = summaryData.netGained
+                
+            if(NET_LOST not in loRanges):
+                loRanges[NET_LOST] = summaryData.netLost
+            if(loRanges[NET_LOST] > summaryData.netLost):
+                loRanges[NET_LOST] = summaryData.netLost
+            
+            if(NET_LOST not in hiRanges):
+                hiRanges[NET_LOST] = summaryData.netLost
+            if(hiRanges[NET_LOST] < summaryData.netLost):
+                hiRanges[NET_LOST] = summaryData.netLost
+            
+            if(TIME not in loRanges):
+                loRanges[TIME] = summaryData.timeSeconds
+            if(loRanges[TIME] > summaryData.timeSeconds):
+                loRanges[TIME] = summaryData.timeSeconds
+            
+            if(TIME not in hiRanges):
+                hiRanges[TIME] = summaryData.timeSeconds
+            if(hiRanges[TIME] < summaryData.timeSeconds):
+                hiRanges[TIME] = summaryData.timeSeconds
+                
+        return loRanges,hiRanges
 
 
-class SummaryData:
+class LapData:
     DIMENSIONS = 5
     
         

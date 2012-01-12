@@ -1,6 +1,6 @@
 (lp0
 (iclusterdata
-SummaryData
+LapData
 p1
 (dp2
 S'totalDist'
@@ -29,7 +29,7 @@ sS'netGained'
 p11
 F140.34922047244095
 sba(iclusterdata
-SummaryData
+LapData
 p12
 (dp13
 g3
@@ -50,7 +50,7 @@ p14
 sg11
 F64.65561417322829
 sba(iclusterdata
-SummaryData
+LapData
 p15
 (dp16
 g3
@@ -71,7 +71,7 @@ p17
 sg11
 F3.1542841207348715
 sba(iclusterdata
-SummaryData
+LapData
 p18
 (dp19
 g3
@@ -92,7 +92,7 @@ p20
 sg11
 F329.5882414698159
 sba(iclusterdata
-SummaryData
+LapData
 p21
 (dp22
 g3
@@ -113,7 +113,7 @@ p23
 sg11
 F175.04354166666644
 sba(iclusterdata
-SummaryData
+LapData
 p24
 (dp25
 g3
@@ -134,7 +134,7 @@ p26
 sg11
 F48.886196522309646
 sba(iclusterdata
-SummaryData
+LapData
 p27
 (dp28
 g3
@@ -155,7 +155,7 @@ p29
 sg11
 F37.84740419947505
 sba(iclusterdata
-SummaryData
+LapData
 p30
 (dp31
 g3
@@ -176,7 +176,7 @@ p32
 sg11
 F53.61722211286083
 sba(iclusterdata
-SummaryData
+LapData
 p33
 (dp34
 g3
@@ -197,7 +197,7 @@ p35
 sg11
 F56.77070603674532
 sba(iclusterdata
-SummaryData
+LapData
 p36
 (dp37
 g3
@@ -218,7 +218,7 @@ p38
 sg11
 F48.88499507874009
 sba(iclusterdata
-SummaryData
+LapData
 p39
 (dp40
 g3

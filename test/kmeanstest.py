@@ -7,16 +7,16 @@ import unittest
 import kmeans
 import pickle
 import copy
+from clusterdata import ClusterData
 import clusterdata
-
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.summaryDatas = self.loadSummaryDatas()
+        self.summaryDatas = self.loadLapDatas()
     def tearDown(self):
         pass
    
-    def loadSummaryDatas(self):
+    def loadLapDatas(self):
         
         
         with open('../resources/objects.pyc') as f:
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
     def testFindClosestCentroid(self):
         km = kmeans.KmeansClusterer(4)
         
-        centroids,mins,maxes = clusterdata.initializeCentroids(4,self.summaryDatas)
+        centroids,mins,maxes = ClusterData.initializeCentroids(4,self.summaryDatas)
         
         self.assertEquals(4,len(centroids))
         
@@ -49,7 +49,7 @@ class Test(unittest.TestCase):
             self.assertTrue(centroid.timeSeconds <= maxes[clusterdata.TIME])
         
         
-        centroids,mins,maxes = clusterdata.initializeCentroids(4,self.summaryDatas)
+        centroids,mins,maxes = ClusterData.initializeCentroids(4,self.summaryDatas)
         self.assertEquals(4,len(centroids))
         
         # take the 4th centroid and clone it.
@@ -90,6 +90,7 @@ class Test(unittest.TestCase):
         self.assertEqual(4,len(clustersByCentroid))
         
         for k,v in clustersByCentroid.items():
+            
             self.assertTrue(len(v) > 0)
             
         
