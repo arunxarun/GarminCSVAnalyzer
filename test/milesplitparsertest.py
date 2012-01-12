@@ -103,9 +103,9 @@ class Test(unittest.TestCase):
         dataByLap = msp.generateLapData(self.activityHasLaps, self.lapHasPoints)
         self.assertIsNotNone(dataByLap)
         self.assertEquals(11,len(dataByLap))
-        
-        with open('../resources/objects.pyc', 'w') as pickleFile:
-            pickle.dump(dataByLap,pickleFile)
+        # uncomment to rewrite object file used in other tests.
+#        with open('../resources/objects.pyc', 'w') as pickleFile:
+#            pickle.dump(dataByLap,pickleFile)
             
             
         
