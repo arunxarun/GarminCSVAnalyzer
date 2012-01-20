@@ -3,6 +3,7 @@ import logging
 import datetime
 import math
 import random
+import time
 
 METERS_IN_FEET = 3.28083989501312
 MINUTE_IN_SECONDS = 60
@@ -17,6 +18,26 @@ BADRECS = 6
 ERROR_DIST = 1
 
 class ClusterData:
+    
+    @staticmethod
+    def getNormalizedMeasure(scale,value,minRange,maxRange):
+        totalRange = maxRange - minRange
+        offSet = value - minRange
+        
+        value =  float(offSet)/totalRange
+        return value*scale
+    
+    @staticmethod
+    def toDateTime(time):
+        zRemoved = time[0:len(time)-1]
+        dt = datetime.datetime.strptime(zRemoved,'%Y-%m-%dT%H:%M:%S')
+        return dt
+
+    @staticmethod
+    def metersToFeet(meters):
+        feet = float(meters)*METERS_IN_FEET
+        return feet
+    
     @staticmethod
     def inErrorRange(point1,point2,minRange,maxRange):
         if(point1.distanceTo(point2,minRange,maxRange) >= ERROR_DIST):
@@ -27,34 +48,32 @@ class ClusterData:
 
     def createMeanCentroid(clusterName,summaryDatas):
         
-        summaryTotalDist = 0.0
-        summaryAvgHr = 0.0
+        summaryTotalTime = 0.0
+        summaryTotalDistance = 0.0
+        summaryAvgHR = 0.0
         summaryNetGained = 0.0
         summaryNetLost = 0.0
-        summaryTime = 0.0
-        summaryGoodRecs = 0.0
-        summaryBadRecs = 0.0
         
         for data in summaryDatas:
-            summaryTotalDist += data.totalDist
-            summaryAvgHr += data.avgHR
+            summaryTotalTime += data.totalTime
+            summaryTotalDistance += data.totalDistance
+            summaryAvgHR += data.avgHR
             summaryNetGained += data.netGained
             summaryNetLost += data.netLost
-            summaryTime += data.timeSeconds
-            summaryGoodRecs += data.goodRecords
-            summaryBadRecs += data.badRecords
+            
             
         
         divisor = len(summaryDatas)
-        avgDist = summaryTotalDist/divisor
-        avgHr = summaryAvgHr/divisor
+        
+        avgTime = summaryTotalTime/divisor
+        avgDist = summaryTotalDistance/divisor
+        avgHR = summaryAvgHR/divisor
         avgNetGained = summaryNetGained/divisor
         avgNetLost = summaryNetLost/divisor
-        avgTime = summaryTime/divisor
-        avgGoodRecs = summaryGoodRecs/divisor
-        avgBadRecs = summaryBadRecs/divisor
         
-        return LapData(clusterName,avgDist,avgHr,avgNetGained,avgNetLost,avgTime,avgGoodRecs,avgBadRecs)
+        return Lap.asLap(clusterName,avgTime,avgDist,avgHR, avgNetGained,avgNetLost)
+            
+    
     
     @staticmethod
 
@@ -72,13 +91,33 @@ class ClusterData:
     @staticmethod
 
     def generateRandomSummaryData(pointName,loRanges,hiRanges):
-        return LapData( 
-                pointName,                                              
-                random.randrange(int(loRanges[TOTAL_DIST]),int(hiRanges[TOTAL_DIST])),
-                random.randrange(int(loRanges[AVG_HR]),int(hiRanges[AVG_HR])),
-                random.randrange(int(loRanges[NET_GAINED]),int(hiRanges[NET_GAINED])),
-                random.randrange(int(loRanges[NET_LOST]),int(hiRanges[NET_LOST])),
-                random.randrange(int(loRanges[TIME]),int(hiRanges[TIME])),0,0)
+        avgDist=  hiRanges[TOTAL_DIST] - loRanges[TOTAL_DIST]
+        if avgDist != 0:
+            avgDist = random.randrange(int(loRanges[TOTAL_DIST]),int(hiRanges[TOTAL_DIST]))
+        
+        avgHR = hiRanges[AVG_HR] - loRanges[AVG_HR]
+        if avgHR != 0:
+            avgHR = random.randrange(int(loRanges[AVG_HR]),int(hiRanges[AVG_HR]))
+            
+        avgGained =  hiRanges[NET_GAINED] - loRanges[NET_GAINED]
+        if avgGained != 0:
+            avgGained = random.randrange(int(loRanges[NET_GAINED]),int(hiRanges[NET_GAINED]))
+            
+        avgLost = hiRanges[NET_LOST] - loRanges[NET_LOST]
+        if avgLost != 0:
+            avgLost = random.randrange(int(loRanges[NET_LOST]),int(hiRanges[NET_LOST]))
+        
+        avgTime = hiRanges[TIME] - loRanges[TIME]
+        if avgTime != 0:
+            avgTime = random.randrange(int(loRanges[TIME]),int(hiRanges[TIME]),0,0)   
+        
+        return Lap.asLap(pointName,                                              
+                 random.randrange(int(loRanges[TIME]),int(hiRanges[TIME])),
+                 random.randrange(int(loRanges[TOTAL_DIST]),int(hiRanges[TOTAL_DIST])),
+                 random.randrange(int(loRanges[AVG_HR]),int(hiRanges[AVG_HR])),
+                 random.randrange(int(loRanges[NET_GAINED]),int(hiRanges[NET_GAINED])),
+                 random.randrange(int(loRanges[NET_LOST]),int(hiRanges[NET_LOST]))
+                )
 
     @staticmethod
     
@@ -150,31 +189,49 @@ class ClusterData:
         return loRanges,hiRanges
 
 
-class LapData:
+class Lap:
     DIMENSIONS = 5
     
+    @staticmethod
+
+    def asLap(id,time,dist,hr, netGained,netLost):
+        #RecID,ActivityRecID,NextSportRecID,StartTime,TotalTimeSeconds,DistanceMeters,MaximumSpeed,Calories,AverageHeartRateBpm,
+        # MaximumHeartRateBpm,Intensity,AverageCadence,TriggerMethod,Notes,
+        tokens = []
+        tokens.append(1)
+        tokens.append(2)
+        tokens.append(0)
+        tokens.append(time)
+        tokens.append(dist)
+        tokens.append(0)
+        tokens.append(0)
+        tokens.append(hr)
         
-    def __init__(self,lap,totalDist,avgHR,netGained,netLost,timeSeconds,goodRecords,badRecords):
-        self.lap = lap
-        self.totalDist = totalDist
-        self.avgHR = avgHR
-        self.netGained = netGained
-        self.netLost = netLost
-        self.timeSeconds = timeSeconds
-        self.goodRecords = goodRecords
-        self.badRecords = badRecords
+        lap = Lap(tokens)
+        lap.lap = id
+        lap.netGained = netGained
+        lap.netLost = netLost
         
+        return lap
     
         
+    def __init__(self,tokens):
+        #RecID,ActivityRecID,NextSportRecID,StartTime,TotalTimeSeconds,DistanceMeters,MaximumSpeed,Calories,AverageHeartRateBpm,MaximumHeartRateBpm,Intensity,AverageCadence,TriggerMethod,Notes,
+        self.id = int(tokens[0])
+        self.lapId = int(tokens[1])
+        self.lap = tokens[3]
+        self.startTime = tokens[3]
+        self.totalTime = tokens[4]
+        self.totalDistance = ClusterData.metersToFeet(float(tokens[5]))
+        self.avgHR = float(tokens[8])
+        self.netGained = 0
+        self.netLost = 0
+                
+
+        
+        
+        
     
-        
-        
-    def getNormalizedMeasure(self,scale,value,minRange,maxRange):
-        totalRange = maxRange - minRange
-        offSet = value - minRange
-        
-        value =  float(offSet)/totalRange
-        return value*scale
     
     # I need the mins and maxes here to normalize the different vectors against one another.
     # otherwise I have _no_idea_ what distance really means. 
@@ -240,14 +297,7 @@ class TrackPoint:
         self.distance = self.metersToFeet(tokens[5])
         self.heartRate = float(tokens[6])
         
-    def toDateTime(self,time):
-        zRemoved = time[0:len(time)-1]
-        dt = datetime.datetime.strptime(zRemoved,'%Y-%m-%dT%H:%M:%S')
-        return dt
-
-    def metersToFeet(self,meters):
-        feet = float(meters)*METERS_IN_FEET
-        return feet
+    
         
     def prettyPrint(self, useDelimiter = True):
         if(useDelimiter == True):

@@ -13,7 +13,7 @@ if __name__ == '__main__':
     msp = MileSplitParser()
     
     if(len(sys.argv) < 2):
-        print "please supply an input file to parse."
+        print "clusterDriver.py [input file] {comma separated filter list}"
         sys.exit(1)
     
     allFilters = []    
@@ -22,43 +22,34 @@ if __name__ == '__main__':
         allFilters = filterBy.split(',')
     else:
         allFilters = []
-        
-    inp = open(sys.argv[1])
     
-    keepProcessing = True
-    activityToId = {}
-    activityHasLaps = {}
-    lapHasTracks = {}
-    trackHasTrackPoints = {}
+    allData = msp.getData(sys.argv[1])
     
-    # load data 
-    while(keepProcessing ):
-        cur = inp.readline()
-        
-        if(cur == ''):
-            break
-        cur = cur.rstrip('\n')
-        
-        if(cur == 'Activity Table'):
-            activityToId = msp.parseActivities(inp,allFilters)
-        elif (cur == 'ActivityLap Table'):
-            activityHasLaps = msp.parseActivityLaps(inp,activityToId.keys())
-        elif (cur == 'Track Table'):
-            lapHasTracks = msp.parseTracks(inp,activityHasLaps)
-        elif (cur == 'TrackPoint Table'):
-            lapHasTrackPoints = msp.parseTrackPoints(inp,lapHasTracks)
-        
-    # now process points.
-    # (1) summarize data by lap.
-    dataByLap = msp.generateLapData(activityToId,lapHasTrackPoints)
-     
+    
     km = kmeans.KmeansClusterer(4)
     
-    print "clustering %d laps"%len(dataByLap)
-    clustersByCentroid = km.cluster(dataByLap)
+    # iterate fast: provide a parser class that will work with the dimensions we want. 
+    # requirements: 
+    #  manage allData
+    #  expose specific subsets of each allData row to a clustering algorithm. 
+    #  provide a way to express distance between each row given a specified subset. 
+    #  
+    
+    #lap,totalDist,avgHR,netGained,netLost,timeSeconds,goodRecords,badRecords
+    # each data should present these in a list. 
+    # make that a contract.
+    dataDescriptor = DataDescriptor([1,2,5])
+    
+    dataFilter = DataFilter(allData,dataDescriptor)
+    
+    clustersByCentroid = km.cluster(dataFilter)
     
     for k, v in clustersByCentroid.items():
         print "------------------"
         print "cluster data avg values"
         k.prettyPrint() 
         print "%d cluster members"%len(v)
+        
+        if(len(v) == 1):
+            v[0].prettyPrint
+        

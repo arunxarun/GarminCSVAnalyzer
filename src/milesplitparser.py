@@ -17,13 +17,44 @@ class MileSplitParser:
     def __init__(self,isVerbose = False):
         self.logger = logging.getLogger('MileSplitParser')
         self.logger.addHandler(logging.StreamHandler())
+        
         if(isVerbose == True):
             self.logger.setLevel(logging.DEBUG)
             
+        self.activitiesById = {}
+        self.laps = []
+        self.lapsToTracks = {}
+        self.trackPoints = []
+            
+            
+    def getData(self,fileName,filters = None,excludeManualLaps = False):
+        
+        inp = open(sys.argv[1])
+    
+        keepProcessing = True
+                
+        # load data 
+        while(keepProcessing ):
+            cur = inp.readline()
+           
+            cur = cur.rstrip('\n')
+            
+            if(cur == 'Activity Table'):
+                self.activityToId = self.getActivityIDs(inp,filters)
+            elif (cur == 'ActivityLap Table'):
+                self.lapData = self.getLaps(inp,excludeManualLaps)
+            elif (cur == 'Track Table'):
+                self.lapsToTracks = self.getLapsToTracks(inp, self.lapData)
+            elif (cur == 'TrackPoint Table'):
+                self.trackData = self.getTrackPoints(inp)
+                break
+                
+            
+        
     '''
     get the list of activities to extract statistics for
     '''        
-    def parseActivities(self,input,allFilters = []):
+    def getActivityIDs(self,input,allFilters = []):
         
             
         activityToId = {}
@@ -53,13 +84,14 @@ class MileSplitParser:
     '''
     map Laps to activities
     '''
-    def parseActivityLaps(self,input,activities):
-        activityHasLaps = {}
+    def getLaps(self,input,excludeManualLaps = False):
+        allLaps = []
         
         # skip trackId line
         cur = input.readline()
     
         keepProcessing = True
+
         while(keepProcessing):
             cur= input.readline()
             if(cur == '\n'):
@@ -67,18 +99,24 @@ class MileSplitParser:
                 continue
             
             tokens = cur.split(',')
-            if tokens[1] in activities:
-                if tokens[1] not in activityHasLaps:
-                    activityHasLaps[tokens[1]] = []
-                activityHasLaps[tokens[1]].append(tokens[0])
+            
+                
+            # RecID,ActivityRecID,NextSportRecID,StartTime,TotalTimeSeconds,DistanceMeters,MaximumSpeed,Calories,AverageHeartRateBpm,MaximumHeartRateBpm,Intensity,AverageCadence,TriggerMethod,Notes,
+            
+            if excludeManualLaps == True and tokens[12] == 'Manual':
+                continue
+            
+            lap = clusterdata.Lap(tokens)
+            allLaps.append(lap)
         
-        self.logger.debug("%d activities detected\n"%len(activityHasLaps))
-        return activityHasLaps
+        self.logger.debug("%d laps total"%len(allLaps))
+        
+        return allLaps
     
     '''
     map tracks to laps
     '''
-    def parseTracks(self,input,activityHasLaps):
+    def getLapsToTracks(self,input,lapData):
         lapHasTracks = {}
         # skip trackId line
         cur = input.readline()
@@ -91,22 +129,19 @@ class MileSplitParser:
             
             tokens = cur.split(',')
             
-            for lapsPerActivity in activityHasLaps.values():
+            for lap in lapData:
                 
-                if tokens[1] in lapsPerActivity:
+                if tokens[1]  == lap.id:
                     if (tokens[1] not in lapHasTracks):
                         lapHasTracks[tokens[1]] = []
                     lapHasTracks[tokens[1]].append(tokens[0])
                 
-        self.logger.debug(" %d laps detected\n"%len(lapHasTracks))    
+        self.logger.debug(" tracks for %d laps found\n"%len(lapHasTracks.keys()))    
         return lapHasTracks
     
-    '''
-    map trackpoints to tracks, store trackpoint data in trackpoints.
-    trackpointID => trackpoint Object.
-    '''
-    def parseTrackPoints(self,input,lapHasTracks):
-        lapHasTrackPoints = {}
+    
+    def getTrackPoints(self,input):
+        trackPoints = []
         # skip trackId line
         cur = input.readline()
         keepProcessing = True
@@ -120,94 +155,13 @@ class MileSplitParser:
             tokens = cur.split(',')
             
             try:
-                for lap,tracks in lapHasTracks.items():
-                    if tokens[0] in tracks:
-                        trackPoint = clusterdata.TrackPoint(curId,tokens)
-                       
-                        if lap not in lapHasTrackPoints:
-                            lapHasTrackPoints[lap] = []
-                        lapHasTrackPoints[lap].append(trackPoint)
-                
-                        curId+=1
-                        break
-                        
+                trackPoint = clusterdata.TrackPoint(curId,tokens)
+                trackPoints.append(trackPoint)
             except Exception as ex:
-                self.logger.warning(ex)
+                #self.logger.warning(ex)
                 continue;
         
-        self.logger.debug(" %d laps processed\n"%len(lapHasTrackPoints))
-        self.logger.debug(" %d total trackpoints\n"%(curId - 1))
-        return lapHasTrackPoints
+        return trackPoints
      
-    '''
-    generate avg hr, pace, altitude gained/lost, total distance, per lap. 
-    ''' 
-    def generateLapData(self,activityHasLaps,lapHasTrackPoints):
-        
-        sortedLaps = sorted(lapHasTrackPoints.keys())
-        allLapDatas = []
-        for lap in sortedLaps:
-            lastDist = 0
-            badRecords = 0
-            points  = lapHasTrackPoints[lap]
-            startDist = 0
-            endDist = 0
-            totalDist = 0.0
-            recordCt = 0
-            totalHr = 0
-            lastElevation = None
-            netLost = 0.0
-            netGained = 0.0
-            startTime = None
-            lastTime = None
-            for point in points:
-                
-                if point.distance >= lastDist:
-                    recordCt +=1
-                    
-                    if lastDist == 0:
-                        startDist = point.distance
-                    
-                    lastDist = point.distance
-                    
-                    if lastElevation == None:
-                        lastElevation = point.altitude
-                   
-                    if lastElevation >= point.altitude:
-                        netLost += lastElevation - point.altitude
-                    else:
-                        netGained += point.altitude - lastElevation
-                        
-                    lastElevation = point.altitude
-                    
-                    
-                    totalHr += point.heartRate
-                    
-                    if startTime == None:
-                        startTime = point.time
-                    
-                    lastTime = point.time                  
-                    # this is where we do aggregation, because distance is increasing. skip anomalous records
-                    
-                else:
-                    #self.logger.warn('distance should be increasing! lap = %s, last dist = %f, cur dist = %f'%(lap,lastDist,point.distance))        
-                    badRecords += 1
-
-            # calc distance
-            endDist = point.distance
-            totalDist = endDist - startDist
-            # calc avg HR
-            avgHR = float(totalHr)/recordCt
-            
-            # calc total time
-            
-            time = lastTime - startTime
-            
-            lapData = clusterdata.LapData(lap,totalDist,avgHR,netGained,netLost,time.seconds,recordCt,badRecords)
-            if badRecords > 0 :
-                self.logger.warn("bad records = %d out of %d records"%(badRecords,len(points)))
-            
-            allLapDatas.append(lapData)
-        
-        return allLapDatas
-        
+    
+    
