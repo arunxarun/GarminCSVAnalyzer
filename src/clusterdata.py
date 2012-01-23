@@ -195,12 +195,13 @@ class Lap:
     @staticmethod
 
     def asLap(id,time,dist,hr, netGained,netLost):
-        #RecID,ActivityRecID,NextSportRecID,StartTime,TotalTimeSeconds,DistanceMeters,MaximumSpeed,Calories,AverageHeartRateBpm,
-        # MaximumHeartRateBpm,Intensity,AverageCadence,TriggerMethod,Notes,
+        #RecID,ActivityRecID,NextSportRecID,StartTime,TotalTimeSeconds,DistanceMeters,MaximumSpeed,Calories,AverageHeartRateBpm,MaximumHeartRateBpm,Intensity,AverageCadence,TriggerMethod,Notes,
+        #1,1,,2011-01-05T15:00:46Z,576.5800000,1609.3439941,3.3762498,179,113,132,Active,,Distance,"",
         tokens = []
-        tokens.append(1)
-        tokens.append(2)
         tokens.append(0)
+        tokens.append(0)
+        tokens.append(0)
+        tokens.append(datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
         tokens.append(time)
         tokens.append(dist)
         tokens.append(0)
@@ -209,8 +210,8 @@ class Lap:
         
         lap = Lap(tokens)
         lap.lap = id
-        lap.netGained = netGained
-        lap.netLost = netLost
+        lap.netGained = ClusterData.metersToFeet(netGained)
+        lap.netLost = ClusterData.metersToFeet(netLost)
         
         return lap
     
@@ -218,10 +219,10 @@ class Lap:
     def __init__(self,tokens):
         #RecID,ActivityRecID,NextSportRecID,StartTime,TotalTimeSeconds,DistanceMeters,MaximumSpeed,Calories,AverageHeartRateBpm,MaximumHeartRateBpm,Intensity,AverageCadence,TriggerMethod,Notes,
         self.id = int(tokens[0])
-        self.lapId = int(tokens[1])
+        self.activityId = int(tokens[1])
         self.lap = tokens[3]
-        self.startTime = tokens[3]
-        self.totalTime = tokens[4]
+        self.startTime = ClusterData.toDateTime(tokens[3])
+        self.totalTime = float(tokens[4])
         self.totalDistance = ClusterData.metersToFeet(float(tokens[5]))
         self.avgHR = float(tokens[8])
         self.netGained = 0
@@ -290,11 +291,11 @@ class TrackPoint:
             raise Exception('invalid TrackPoint, altitude or distance are blank')
         self.id = selfId
         self.trackId = tokens[0]
-        self.time = self.toDateTime(tokens[1])
+        self.time = ClusterData.toDateTime(tokens[1])
         self.lat = float(tokens[2])
         self.long = float(tokens[3])
-        self.altitude = self.metersToFeet(tokens[4])
-        self.distance = self.metersToFeet(tokens[5])
+        self.altitude = ClusterData.metersToFeet(tokens[4])
+        self.distance = ClusterData.metersToFeet(tokens[5])
         self.heartRate = float(tokens[6])
         
     

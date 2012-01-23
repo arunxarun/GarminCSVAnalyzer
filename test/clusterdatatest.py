@@ -1,101 +1,66 @@
 '''
-Created on Dec 31, 2011
+Created on Jan 22, 2012
 
 @author: jacoba100
 '''
 import unittest
-import clusterdata
-import pickle
+from clusterdata import Lap
+from clusterdata import ClusterData
+from clusterdata import TrackPoint
 
 class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.summaryDatas = self.loadSummaryDatas()
         pass
+
+
     def tearDown(self):
         pass
-   
-    def loadSummaryDatas(self):
-        
-        with open('../resources/objects.pyc') as f:
-            summaryDatas = pickle.load(f)
-            
-        return summaryDatas
-        
-
-    def testSummaryDataGetNormalizedMeasure(self):
-        # totalDist,avgHR,netGained,netLost,timeSeconds,goodRecords,badRecords
-        sd  = clusterdata.SummaryData("1",120,130,1400,1200,200,0,0)
-        mins = [5,50,0,0,0]
-        maxes = [150,160,1500,1500,360]
-        
-        myDist = sd.getNormalizedMeasure(100,sd.totalDist,mins[clusterdata.TOTAL_DIST],maxes[clusterdata.TOTAL_DIST])
-        
-        self.assertTrue(myDist >= mins[clusterdata.TOTAL_DIST])
-        self.assertTrue(myDist <= maxes[clusterdata.TOTAL_DIST])
-        
-        self.assertEquals((float(115)/145)*100,myDist)
-        pass
 
 
-    def testSummaryDataDistanceTo(self):
+    def testNewLapFromTokens(self):
+        string = '1,1,,2011-01-05T15:00:46Z,576.5800000,1609.3439941,3.3762498,179,113,132,Active,,Distance,"",'
+        tokens = string.split(',')
+        lap= Lap(tokens)
+        self.assertFalse(None == lap)
+        self.assertEquals('2011-01-05T15:00:46Z',lap.lap)
+        self.assertEquals(1,lap.id)
+        self.assertEquals(1,lap.activityId)
+        self.assertEquals(ClusterData.metersToFeet(1609.3439941),lap.totalDistance)
+        self.assertEquals(576.58,lap.totalTime)
         
-        sd  = clusterdata.SummaryData("1",120,130,1400,1200,200,0,0)
-        mins = [5,50,0,0,0]
-        maxes = [150,160,1500,1500,360]
+    def testNewLapFromAsLap(self):
+        lap1 = Lap.asLap(1,589,300,140, 100,200)
         
+        self.assertFalse(None == lap1)
+        self.assertEquals(1,lap1.lap)
         
-        sd2 = clusterdata.SummaryData("2",120,130,1400,1200,200,0,0)
+        self.assertEquals(589,lap1.totalTime)
+        self.assertEquals(ClusterData.metersToFeet(300),lap1.totalDistance)
+        self.assertEquals(ClusterData.metersToFeet(100),lap1.netGained)
+        self.assertEquals(ClusterData.metersToFeet(200),lap1.netLost)
         
-        
-        self.assertEquals(0, sd.distanceTo(sd2, mins, maxes))
-        
-        # probably need something a little beefier here as well
-        
-        
-    def testInitializeRanges(self):
-        mins, maxes = clusterdata.initializeRanges(self.summaryDatas)
-        
-        self.assertFalse(None == mins)
-        self.assertFalse(None == maxes)
-        self.assertEquals(clusterdata.SummaryData.DIMENSIONS,len(mins))
-        self.assertEquals(clusterdata.SummaryData.DIMENSIONS,len(maxes))
-        
-        for i in range(0,clusterdata.SummaryData.DIMENSIONS):
-            self.assertTrue(maxes[i] > mins[i])
-        
-    
-    def testInitializeCentroids(self):
-                
-        centroids,mins,maxes = clusterdata.initializeCentroids(4,self.summaryDatas)
-        self.assertFalse(centroids == None)
-        self.assertFalse(mins == None)
-        self.assertFalse(maxes == None)
-        
-        self.assertEquals(4,len(centroids))
-        
-    def testCreateMeanCentroid(self):
-        mins,maxes = clusterdata.initializeRanges(self.summaryDatas)
-        centroid = clusterdata.createMeanCentroid("foobar", self.summaryDatas)
-        
-        self.assertFalse(centroid == None)
-        self.assertTrue(centroid.totalDist >= mins[clusterdata.TOTAL_DIST])
-        self.assertTrue(centroid.totalDist <= maxes[clusterdata.TOTAL_DIST])
-        
-        self.assertTrue(centroid.avgHR >= mins[clusterdata.AVG_HR])
-        self.assertTrue(centroid.avgHR <= maxes[clusterdata.AVG_HR])
-        
-        self.assertTrue(centroid.netGained >= mins[clusterdata.NET_GAINED])
-        self.assertTrue(centroid.netGained <= maxes[clusterdata.NET_GAINED])
-        
-        self.assertTrue(centroid.netLost >= mins[clusterdata.NET_LOST])
-        self.assertTrue(centroid.netLost <= maxes[clusterdata.NET_LOST])
-        
-        self.assertTrue(centroid.timeSeconds >= mins[clusterdata.TIME])
-        self.assertTrue(centroid.timeSeconds <= maxes[clusterdata.TIME])
+    def testNewTrackPointFromTokens(self):
+        string = '1,2011-01-05T15:00:46Z,47.5859201,-122.2451507,79.4460449,0.0000000,73,,Absent,'
+        tokens = string.split(',')
 
+        trackPoint = TrackPoint('foo',tokens)
+        self.assertTrue(trackPoint != None)
+        self.assertEquals(trackPoint.id,'foo')
+        self.assertEquals(47.5859201,trackPoint.lat)
+        self.assertEquals(-122.2451507,trackPoint.long)
+        self.assertEquals(ClusterData.metersToFeet(79.4460449),trackPoint.altitude)
         
+        
+        string = '2,2011-01-05T15:16:46Z,,,,,,,,'
+        tokens = string.split(',')
+        try:
+            trackPoint = TrackPoint('foo',tokens)
+            self.assertFalse(True) # shouldn't have reached here!
+        except Exception as ex:
+            self.assertTrue(True)
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

@@ -57,7 +57,7 @@ class MileSplitParser:
     def getActivityIDs(self,input,allFilters = []):
         
             
-        activityToId = {}
+        activitiesToIds = {}
         # skip trackId line
         cur = input.readline()
         keepProcessing = True
@@ -76,10 +76,10 @@ class MileSplitParser:
                     addToMap = False
             
             if(addToMap == True):        
-                activityToId[tokens[0]] = tokens[3]
+                activitiesToIds[tokens[0]] = tokens[3]
     
         
-        return activityToId
+        return activitiesToIds
     
     '''
     map Laps to activities
@@ -130,13 +130,13 @@ class MileSplitParser:
             tokens = cur.split(',')
             
             for lap in lapData:
-                
-                if tokens[1]  == lap.id:
-                    if (tokens[1] not in lapHasTracks):
-                        lapHasTracks[tokens[1]] = []
-                    lapHasTracks[tokens[1]].append(tokens[0])
-                
-        self.logger.debug(" tracks for %d laps found\n"%len(lapHasTracks.keys()))    
+                testLapId = float(tokens[1])
+                if testLapId  == lap.id:
+                    testTrackId = float(tokens[0])
+                    if (testLapId not in lapHasTracks):
+                        lapHasTracks[testLapId] = []
+                    lapHasTracks[testLapId].append(testTrackId)
+            
         return lapHasTracks
     
     
