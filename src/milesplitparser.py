@@ -7,12 +7,18 @@ import sys
 import logging
 import datetime
 import clusterdata
-
+from kmeansprimitives import Parser
     
 '''
-map activity IDs to name strings
+This class parses garmin data files. There are two methods:
+call loadData() first, then call getData() to retrieve specific parsed data.
 '''
-class MileSplitParser:
+
+class MileSplitParser(Parser):
+    
+    LAPS = 0
+    TRACKSTOLAPS = 1
+    TRACKPOINTS = 2
     
     def __init__(self,isVerbose = False):
         self.logger = logging.getLogger('MileSplitParser')
@@ -26,10 +32,19 @@ class MileSplitParser:
         self.lapsToTracks = {}
         self.trackPoints = []
             
-            
-    def getData(self,fileName,filters = None,excludeManualLaps = False):
+    
+    def getData(self,dataId): 
         
-        inp = open(sys.argv[1])
+        if(dataId == self.LAPS):
+            return self.laps
+        elif(dataId == self.TRACKSTOLAPS):
+            return self.lapsToTracks
+        elif(dataId == self.TRACKPOINTS):
+            return self.trackPoints
+               
+    def loadData(self,fileName,filters = [],excludeManualLaps = False):
+        
+        inp = open(fileName)
     
         keepProcessing = True
                 
@@ -42,11 +57,11 @@ class MileSplitParser:
             if(cur == 'Activity Table'):
                 self.activityToId = self.getActivityIDs(inp,filters)
             elif (cur == 'ActivityLap Table'):
-                self.lapData = self.getLaps(inp,excludeManualLaps)
+                self.laps = self.getLaps(inp,excludeManualLaps)
             elif (cur == 'Track Table'):
-                self.lapsToTracks = self.getLapsToTracks(inp, self.lapData)
+                self.lapsToTracks = self.getTracksToLaps(inp)
             elif (cur == 'TrackPoint Table'):
-                self.trackData = self.getTrackPoints(inp)
+                self.trackPoints = self.getTrackPoints(inp)
                 break
                 
             
@@ -85,7 +100,7 @@ class MileSplitParser:
     map Laps to activities
     '''
     def getLaps(self,input,excludeManualLaps = False):
-        allLaps = []
+        allLaps = {}
         
         # skip trackId line
         cur = input.readline()
@@ -106,8 +121,8 @@ class MileSplitParser:
             if excludeManualLaps == True and tokens[12] == 'Manual':
                 continue
             
-            lap = clusterdata.Lap(tokens)
-            allLaps.append(lap)
+            lap = clusterdata.GarminLap(tokens)
+            allLaps[lap.id] = lap
         
         self.logger.debug("%d laps total"%len(allLaps))
         
@@ -116,8 +131,8 @@ class MileSplitParser:
     '''
     map tracks to laps
     '''
-    def getLapsToTracks(self,input,lapData):
-        lapHasTracks = {}
+    def getTracksToLaps(self,input):
+        trackHasLap = {}
         # skip trackId line
         cur = input.readline()
         keepProcessing = True
@@ -129,15 +144,11 @@ class MileSplitParser:
             
             tokens = cur.split(',')
             
-            for lap in lapData:
-                testLapId = float(tokens[1])
-                if testLapId  == lap.id:
-                    testTrackId = float(tokens[0])
-                    if (testLapId not in lapHasTracks):
-                        lapHasTracks[testLapId] = []
-                    lapHasTracks[testLapId].append(testTrackId)
+            testLapId = int(tokens[1])
+            testTrackId = int(tokens[0])
+            trackHasLap[testTrackId] = testLapId
             
-        return lapHasTracks
+        return trackHasLap
     
     
     def getTrackPoints(self,input):
@@ -163,5 +174,3 @@ class MileSplitParser:
         
         return trackPoints
      
-    
-    

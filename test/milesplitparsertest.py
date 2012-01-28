@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
         pass
 
 
-    def testActivityParser(self):
+    def testGetActivityIds(self):
         msp = MileSplitParser()
         self.file.seek(self.activityParserPos,0)
         activitiesToIds = msp.getActivityIDs(self.file, [])
@@ -71,10 +71,10 @@ class Test(unittest.TestCase):
         
         self.assertFalse(laps == None)
         self.assertTrue(11,len(laps))
-        lap0 = laps[0]
+        lap0 = laps[1]
         self.assertEquals(1,lap0.id)
         self.assertEquals('2011-01-05T15:00:46Z',lap0.lap)    
-        lap11 = laps[10]
+        lap11 = laps[11]
         self.assertEquals(11,lap11.id)
         self.assertEquals(1,lap11.activityId)
         
@@ -84,26 +84,19 @@ class Test(unittest.TestCase):
         self.assertTrue(2,len(laps))
         
         
-    def testGetLapsToTracks(self):
+    def testGetTracksToLaps(self):
         
         msp = MileSplitParser()
-        self.file.seek(self.lapParserPos,0)
-        laps = msp.getLaps(self.file)
         self.file.seek(self.trackParserPos)
-        lapsToTracks = msp.getLapsToTracks(self.file, laps)
+        tracksToLaps = msp.getTracksToLaps(self.file)
         
-        self.assertFalse(lapsToTracks == None)
-        self.assertEquals(11,len(lapsToTracks))
+        self.assertFalse(tracksToLaps == None)
+        self.assertEquals(16,len(tracksToLaps))
         
-        self.assertFalse(lapsToTracks[1] == None)
-        ltt1 = lapsToTracks[1]
-        self.assertEquals(1,len(ltt1))
-        self.assertEquals(1,ltt1[0])
-        
-        ltt2 = lapsToTracks[2]
-        self.assertEquals(2,len(ltt2))
-        self.assertEquals(2,ltt2[0])
-        self.assertEquals(3,ltt2[1])
+        startTrack = 0
+        for track in tracksToLaps.keys():
+            self.assertTrue(track > startTrack)
+            startTrack = track
 
     def testGetTrackPoints(self):
         self.file.seek(self.trackPointParserPos,0)
@@ -121,7 +114,40 @@ class Test(unittest.TestCase):
         self.assertEquals(0,tp1.distance)
         self.assertEquals(73,tp1.heartRate)
        
-         
+    def testLoadData(self):
+        msp = MileSplitParser()
+        msp.loadData('../resources/test.csv')
+        laps = msp.getData(MileSplitParser.LAPS);
+        self.assertNotEquals(None,laps)
+        self.assertNotEquals(0,len(laps))
+        
+        for lap in laps.values():
+            self.assertNotEqual(0,lap.id)
+            self.assertNotEqual(0,lap.activityId)
+            self.assertNotEqual(None,lap.lap)
+            self.assertNotEqual(0,lap.totalTime)
+            self.assertNotEqual(0,lap.totalDistance)
+            self.assertNotEqual(0,lap.avgHR)
+            
+        lapsToTracks = msp.getData(MileSplitParser.TRACKSTOLAPS)
+        self.assertNotEquals(None,lapsToTracks)
+        self.assertNotEquals(0,len(lapsToTracks))
+        
+        trackPoints = msp.getData(MileSplitParser.TRACKPOINTS)
+        self.assertNotEquals(None,trackPoints)
+        self.assertNotEquals(0,len(trackPoints))
+        
+        for trackPoint in trackPoints:
+            self.assertNotEquals(0,trackPoint.id)
+            self.assertNotEquals(0,trackPoint.trackId)
+            self.assertNotEquals(None,trackPoint.time)
+            self.assertNotEquals(0,trackPoint.lat)
+            self.assertNotEquals(0,trackPoint.long)
+            
+            self.assertNotEquals(0,trackPoint.altitude)
+            self.assertNotEquals(0,trackPoint.heartRate)
+        # TODO: more integrity checking
+        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

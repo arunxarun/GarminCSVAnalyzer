@@ -5,6 +5,7 @@ Created on Jan 11, 2012
 '''
 import sys
 from  milesplitparser import MileSplitParser
+from garmindatafilter import GarminDataFilter
 import kmeans
 
 
@@ -28,21 +29,11 @@ if __name__ == '__main__':
     
     km = kmeans.KmeansClusterer(4)
     
-    # iterate fast: provide a parser class that will work with the dimensions we want. 
-    # requirements: 
-    #  manage allData
-    #  expose specific subsets of each allData row to a clustering algorithm. 
-    #  provide a way to express distance between each row given a specified subset. 
-    #  
+    parser = MileSplitParser()
+    parser.loadData('../resources/test.csv')
+    gdf = GarminDataFilter(parser) 
     
-    #lap,totalDist,avgHR,netGained,netLost,timeSeconds,goodRecords,badRecords
-    # each data should present these in a list. 
-    # make that a contract.
-    dataDescriptor = DataDescriptor([1,2,5])
-    
-    dataFilter = DataFilter(allData,dataDescriptor)
-    
-    clustersByCentroid = km.cluster(dataFilter)
+    clustersByCentroid = km.cluster(gdf)
     
     for k, v in clustersByCentroid.items():
         print "------------------"

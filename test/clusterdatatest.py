@@ -4,7 +4,7 @@ Created on Jan 22, 2012
 @author: jacoba100
 '''
 import unittest
-from clusterdata import Lap
+from clusterdata import GarminLap
 from clusterdata import ClusterData
 from clusterdata import TrackPoint
 
@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
     def testNewLapFromTokens(self):
         string = '1,1,,2011-01-05T15:00:46Z,576.5800000,1609.3439941,3.3762498,179,113,132,Active,,Distance,"",'
         tokens = string.split(',')
-        lap= Lap(tokens)
+        lap= GarminLap(tokens)
         self.assertFalse(None == lap)
         self.assertEquals('2011-01-05T15:00:46Z',lap.lap)
         self.assertEquals(1,lap.id)
@@ -30,8 +30,8 @@ class Test(unittest.TestCase):
         self.assertEquals(ClusterData.metersToFeet(1609.3439941),lap.totalDistance)
         self.assertEquals(576.58,lap.totalTime)
         
-    def testNewLapFromAsLap(self):
-        lap1 = Lap.asLap(1,589,300,140, 100,200)
+    def testNewGarminLapFromAsGarminLap(self):
+        lap1 = GarminLap.asLap(1,589,300,140, 100,200)
         
         self.assertFalse(None == lap1)
         self.assertEquals(1,lap1.lap)
@@ -60,6 +60,8 @@ class Test(unittest.TestCase):
             self.assertFalse(True) # shouldn't have reached here!
         except Exception as ex:
             self.assertTrue(True)
+            
+   
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

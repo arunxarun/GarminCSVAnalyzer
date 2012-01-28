@@ -11,26 +11,22 @@ class KmeansClusterer:
         self.logger.addHandler(logging.StreamHandler())
         self.centroidCt = centroidCt
         
-    def cluster(self,summaryDatas):
-        if len(summaryDatas) < self.centroidCt:
-            self.logger.error("exiting, less points than centroids")
-            sys.exit()
-       
-            
-        centroids,mins,maxes =  ClusterData.initializeCentroids(self.centroidCt,summaryDatas)
+    def cluster(self,dataFilter):
+        
+        centroids =  dataFilter.initializeCentroids(self.centroidCt)
         
         clustersByCentroid = {}
         keepGoing = True
         while(keepGoing == True):
-            for data in summaryDatas:
-                centroid = self.findClosestCentroid(centroids,data,mins,maxes)
+            for data in dataFilter.allData:
+                centroid = self.findClosestCentroid(dataFilter,centroids,data)
                 if(centroid not in clustersByCentroid):
                     clustersByCentroid[centroid] = []
                 clustersByCentroid[centroid].append(data)
                 
-            newCentroids = self.generateNewCentroidsFromClusters(centroids,clustersByCentroid,mins,maxes)
+            newCentroids = self.generateNewCentroidsFromClusters(centroids,clustersByCentroid)
             
-            if(self.areCentroidsCloseEnough(centroids,newCentroids,mins,maxes)):
+            if(self.areCentroidsCloseEnough(dataFilter,centroids,newCentroids)):
                 keepGoing = False
             else:
                 centroids = newCentroids
@@ -40,10 +36,10 @@ class KmeansClusterer:
         return clustersByCentroid
             
 
-    def areCentroidsCloseEnough(self,oldCentroids,newCentroids,mins,maxes):
+    def areCentroidsCloseEnough(self,dataFilter,oldCentroids,newCentroids):
         
         for i in range(0,len(oldCentroids)):
-            if ClusterData.inErrorRange(oldCentroids[i], newCentroids[i], mins,maxes) == False:
+            if dataFilter.inErrorRange(oldCentroids[i], newCentroids[i]) == False:
                 return False
             
         
@@ -52,11 +48,11 @@ class KmeansClusterer:
             
             
         
-    def findClosestCentroid(self,centroids,data,mins,maxes):
+    def findClosestCentroid(self,dataFilter,centroids,data):
         mindist = float(sys.maxint)
         closestCentroid = None
         for centroid in centroids:
-            dist = centroid.distanceTo(data,mins,maxes)
+            dist = centroid.distanceTo(data,dataFilter)
             if(dist < mindist):
                 mindist = dist
                 closestCentroid = centroid
@@ -65,16 +61,16 @@ class KmeansClusterer:
         return closestCentroid
     
     
-    def generateNewCentroidsFromClusters(self,oldCentroids,clustersByCentroids,mins,maxes):
+    def generateNewCentroidsFromClusters(self,dataFilter,oldCentroids,clustersByCentroids):
         newCentroids = []
         i = 0
         for centroid in oldCentroids:
             if centroid in clustersByCentroids:
                 dataByCluster = clustersByCentroids[centroid]
-                newCentroids.append(ClusterData.createMeanCentroid(centroid.lap,dataByCluster))
+                newCentroids.append(dataFilter.createMeanCentroid(centroid.getId(),dataByCluster))
             else:
                 clusterName = "cluster %d"%i
-                newCentroids.append(ClusterData.generateRandomSummaryData(clusterName,mins,maxes))
+                newCentroids.append(dataFilter.generateRandomCentroid(clusterName))
             
             i += 1
     
