@@ -90,15 +90,15 @@ class GarminDataFilter(DataFilter):
         
         
         
-        totalRange = self.hiranges[valueIndex] - self.loranges[valueIndex]
-        offSet = value - self.loranges[valueIndex]
+        totalRange = self.hiRanges[valueIndex] - self.loRanges[valueIndex]
+        offSet = value - self.loRanges[valueIndex]
         
         value =  float(offSet)/totalRange
         return value*scale
     
         
     def inErrorRange(self,point1,point2):
-        if(point1.distanceTo(point2) >= ERROR_DIST):
+        if(point1.distanceTo(point2,self) >= ERROR_DIST):
             return False
         else:
             return True
@@ -134,16 +134,27 @@ class GarminDataFilter(DataFilter):
     
     
     def initializeCentroids(self,centroidCt):
-        
-        loRanges,hiRanges = self.initializeRanges(self.dataPoints)
-        
         centroids = []
         
         for i in range(centroidCt):
-            centroids.append(self.generateRandomSummaryData("centroid %d"%i,loRanges,hiRanges))
+            isTooClose = True
+            newCentroid = None
+            while isTooClose == True:
+                newCentroid = self.generateRandomCentroid("centroid %d"%i)
+                isTooClose = False
+                
+                for centroid in centroids:
+                    if self.inErrorRange(centroid,newCentroid):
+                        isTooClose = True
+                        break
+                    
+            if newCentroid != None:
+                centroids.append(newCentroid)
+            else:
+                raise Exception("null centroid generated!")
         
         
-        return centroids,self.loRanges,hiRanges
+        return centroids
 
     def generateRandomCentroid(self,pointName):
         avgDist=  self.hiRanges[self.TOTAL_DIST] - self.loRanges[self.TOTAL_DIST]
@@ -164,7 +175,7 @@ class GarminDataFilter(DataFilter):
         
         avgTime = self.hiRanges[self.TIME] - self.loRanges[self.TIME]
         if avgTime != 0:
-            avgTime = random.randrange(int(self.loRanges[self.TIME]),int(self.hiRanges[self.TIME]),0,0)   
+            avgTime = random.randrange(int(self.loRanges[self.TIME]),int(self.hiRanges[self.TIME]))   
         
         return GarminLap.asLap(pointName,                                              
                  random.randrange(int(self.loRanges[self.TIME]),int(self.hiRanges[self.TIME])),

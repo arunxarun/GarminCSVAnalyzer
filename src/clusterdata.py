@@ -70,20 +70,20 @@ class GarminLap(DataPoint):
         
     def distanceTo(self,otherSummaryData,dataFilter):
         
-        myDist = dataFilter.getNormalizedMeasure(100,self.totalDist,self.TOTAL_DIST)
-        otherDist = dataFilter.getNormalizedMeasure(100,otherSummaryData.totalDist,self.TOTAL_DIST)
+        myDist = dataFilter.getNormalizedMeasure(100,self.totalDistance,dataFilter.TOTAL_DIST)
+        otherDist = dataFilter.getNormalizedMeasure(100,otherSummaryData.totalDistance,dataFilter.TOTAL_DIST)
         
-        myHR = dataFilter.getNormalizedMeasure(100, self.avgHR,self.AVG_HR)
-        otherHR = dataFilter.getNormalizedMeasure(100, otherSummaryData.avgHR, self.AVG_HR)
+        myHR = dataFilter.getNormalizedMeasure(100, self.avgHR,dataFilter.AVG_HR)
+        otherHR = dataFilter.getNormalizedMeasure(100, otherSummaryData.avgHR, dataFilter.AVG_HR)
         
-        myGained = dataFilter.getNormalizedMeasure(100, self.netGained, self.NET_GAINED)
-        otherGained = dataFilter.getNormalizedMeasure(100, otherSummaryData.netGained, self.NET_GAINED)
+        myGained = dataFilter.getNormalizedMeasure(100, self.netGained, dataFilter.NET_GAINED)
+        otherGained = dataFilter.getNormalizedMeasure(100, otherSummaryData.netGained, dataFilter.NET_GAINED)
         
-        myLost = dataFilter.getNormalizedMeasure(100, self.netLost, self.NET_LOST)
-        otherLost = dataFilter.getNormalizedMeasure(100, otherSummaryData.netLost, self.NET_LOST)
+        myLost = dataFilter.getNormalizedMeasure(100, self.netLost, dataFilter.NET_LOST)
+        otherLost = dataFilter.getNormalizedMeasure(100, otherSummaryData.netLost, dataFilter.NET_LOST)
         
-        myTime = dataFilter.getNormalizedMeasure(100, self.timeSeconds, self.TIME)
-        otherTime = dataFilter.getNormalizedMeasure(100, otherSummaryData.timeSeconds, self.TIME)
+        myTime = dataFilter.getNormalizedMeasure(100, self.totalTime, dataFilter.TIME)
+        otherTime = dataFilter.getNormalizedMeasure(100, otherSummaryData.totalTime, dataFilter.TIME)
         
         
         rawSum = math.pow(myDist-otherDist,2) + math.pow(myHR - otherHR,2) + math.pow(myGained - otherGained,2) + math.pow(myLost - otherLost, 2) + math.pow(myTime - otherTime,2)
@@ -96,13 +96,11 @@ class GarminLap(DataPoint):
         if(separator == True):
             print "------"
         print "lap = %s,"%self.lap
-        print "totalDist = %f,"%self.totalDist
+        print "totalDistance = %f,"%self.totalDistance
         print "avgHR = %f,"%self.avgHR
         print "netGained = %f"%self.netGained
         print "netLost = %f"%self.netLost
-        print "timeSecs = %f"%self.timeSeconds
-        print "goodRecords = %d"%self.goodRecords
-        print "badRecords = %d"%self.badRecords
+        print "timeSecs = %f"%self.totalTime
             
     
 
