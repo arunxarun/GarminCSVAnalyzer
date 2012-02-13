@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.file = open('../resources/test.csv')
+        self.file = open('../resources/January_Test.tsv')
         keepProcessing = True
         while(keepProcessing):
             
@@ -71,12 +71,12 @@ class Test(unittest.TestCase):
         
         self.assertFalse(laps == None)
         self.assertTrue(11,len(laps))
-        lap0 = laps[1]
-        self.assertEquals(1,lap0.id)
-        self.assertEquals('2011-01-05T15:00:46Z',lap0.lap)    
-        lap11 = laps[11]
-        self.assertEquals(11,lap11.id)
-        self.assertEquals(1,lap11.activityId)
+        lap38 = laps[38]
+        self.assertEquals(38,lap38.id)
+        self.assertEquals('2011-01-05T15:00:46Z',lap38.lap)    
+        lap48 = laps[48]
+        self.assertEquals(48,lap48.id)
+        self.assertEquals(4,lap48.activityId)
         
         self.file.seek(self.lapParserPos,0)
         laps = msp.getLaps(self.file,True) # exclude manual laps
@@ -116,7 +116,7 @@ class Test(unittest.TestCase):
        
     def testLoadData(self):
         msp = MileSplitParser()
-        msp.loadData('../resources/test.csv')
+        msp.loadData('../resources/January_Test.tsv')
         laps = msp.getData(MileSplitParser.LAPS);
         self.assertNotEquals(None,laps)
         self.assertNotEquals(0,len(laps))

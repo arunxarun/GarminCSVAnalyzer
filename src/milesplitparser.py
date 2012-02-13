@@ -19,6 +19,7 @@ class MileSplitParser(Parser):
     LAPS = 0
     TRACKSTOLAPS = 1
     TRACKPOINTS = 2
+    SEPARATOR = '\t'
     
     def __init__(self,isVerbose = False):
         self.logger = logging.getLogger('MileSplitParser')
@@ -82,7 +83,7 @@ class MileSplitParser(Parser):
                 keepProcessing = False
                 continue
             
-            tokens = cur.split(',')
+            tokens = cur.split(self.SEPARATOR)
             
             addToMap = True
             
@@ -113,7 +114,7 @@ class MileSplitParser(Parser):
                 keepProcessing = False
                 continue
             
-            tokens = cur.split(',')
+            tokens = cur.split(self.SEPARATOR)
             
                 
             # RecID,ActivityRecID,NextSportRecID,StartTime,TotalTimeSeconds,DistanceMeters,MaximumSpeed,Calories,AverageHeartRateBpm,MaximumHeartRateBpm,Intensity,AverageCadence,TriggerMethod,Notes,
@@ -142,7 +143,7 @@ class MileSplitParser(Parser):
                 keepProcessing = False
                 continue
             
-            tokens = cur.split(',')
+            tokens = cur.split(self.SEPARATOR)
             
             testLapId = int(tokens[1])
             testTrackId = int(tokens[0])
@@ -163,7 +164,7 @@ class MileSplitParser(Parser):
                 keepProcessing = False
                 continue
             
-            tokens = cur.split(',')
+            tokens = cur.split(self.SEPARATOR)
             
             try:
                 trackPoint = clusterdata.TrackPoint(curId,tokens)
